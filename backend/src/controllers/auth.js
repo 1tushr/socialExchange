@@ -108,4 +108,20 @@ async function handleLogin(req, res) {
   }
 }
 
-export { handleSignup, handleLogin };
+async function handleLogout(req, res) {
+  try {
+    if (!req.cookies.token) {
+      res.status(HTTP_BAD_REQUEST).json({ message: "no token to clear" });
+    }
+    res
+      .clearCookie("token", { sameSite: "none", secure: true })
+      .status(HTTP_OK)
+      .json({ message: "user logged out success" });
+  } catch (error) {
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: "An error occurred during user logout",
+      details: error.message,
+    });
+  }
+}
+export { handleSignup, handleLogin, handleLogout };

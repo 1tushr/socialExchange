@@ -1,5 +1,9 @@
 import express from "express";
-import { handleSignup, handleLogin } from "../controllers/auth.js";
+import {
+  handleSignup,
+  handleLogin,
+  handleLogout,
+} from "../controllers/auth.js";
 
 const authRouter = express.Router();
 
@@ -7,9 +11,9 @@ const authRouter = express.Router();
 
 authRouter.post("/signup", handleSignup);
 
-export default authRouter;
 //login
 authRouter.post("/login", handleLogin);
 //logout
-
+authRouter.get("/logout", handleLogout);
 //fetch user
+export default authRouter;

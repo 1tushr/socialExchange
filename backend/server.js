@@ -1,11 +1,12 @@
-
-import dotenv from "dotenv";
 import express from "express";
+import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 import connectDb from "../backend/src/config/database.js";
 import authRouter from "./src/routes/auth.js";
 dotenv.config();
 const app = express();
-app.use(express.json())
+app.use(express.json());
+app.use(cookieParser());
 const startServer = async () => {
   try {
     await connectDb();
@@ -21,5 +22,4 @@ const startServer = async () => {
 
 startServer();
 
-
-app.use ('/auth',authRouter);
+app.use("/auth", authRouter);
