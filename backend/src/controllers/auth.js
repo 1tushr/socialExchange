@@ -34,9 +34,12 @@ async function handleSignup(req, res) {
         email,
         password: hashedPass,
       });
-      return res
-        .status(HTTP_CREATED)
-        .json({ message: "User created successfully", newUser });
+      if (newUser) {
+        let { password, ...userData } = newUser._doc;
+        return res
+          .status(HTTP_CREATED)
+          .json({ message: "User created successfully", userData });
+      }
     } else {
       return res
         .status(HTTP_BAD_REQUEST)
