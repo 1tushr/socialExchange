@@ -107,7 +107,7 @@ async function handleLogin(req, res) {
     });
   }
 }
-
+// LOGOUT FUNCTION
 async function handleLogout(req, res) {
   try {
     if (!req.cookies.token) {
@@ -124,4 +124,17 @@ async function handleLogout(req, res) {
     });
   }
 }
-export { handleSignup, handleLogin, handleLogout };
+
+//FETCH USER
+async function handleUserFetch(req, res) {
+  try {
+    const userFetched = await User.findById({ _id: req.locals._id });
+    const { password, ...fetched } = userFetched._doc;
+    res.status(HTTP_OK).json({ message: "user fetched success", fetched });
+  } catch (error) {
+    res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ message: "user was not fetched", details: error.message });
+  }
+}
+export { handleSignup, handleLogin, handleLogout, handleUserFetch };
