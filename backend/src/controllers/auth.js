@@ -2,8 +2,10 @@ import User from "../models/users.js";
 import * as HttpStatusCodes from "../constants/httpStatusCode.js";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
 dotenv.config();
 const {
+  HTTP_OK,
   HTTP_CREATED,
   HTTP_BAD_REQUEST,
   HTTP_UNAUTHORIZED,
@@ -85,16 +87,19 @@ async function handleLogin(req, res) {
         .status(HTTP_UNAUTHORIZED)
         .json({ message: "Incorrect password" });
     }
-
-    // Successful login
-    return res.status(200).json({
-      message: "User logged in successfully",
-      userExists: {
-        _id: userExists._id,
-        username: userExists.username,
-        email: userExists.email,
-      },
-    });
+    if (userExists && isPasswordCorrect) {
+      const { password, ...userLoggedIn } = userExists._doc;
+      // Successful login
+      const token = jwt.sign(
+        { _id: userExists._id },
+        process.env.SECRET_TOKEN,
+        { expiresIn: process.env.EXPIRY_TIME }
+      );
+      res.cookie("token", token).status(HTTP_OK).json({
+        message: "User logged in successfully",
+        userLoggedIn,
+      });
+    }
   } catch (error) {
     return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
       error: "An error occurred during user login",
