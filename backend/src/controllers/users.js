@@ -154,9 +154,53 @@ async function handleUnfollowUser(req, res) {
     });
   }
 }
+
+// function to block user
+
+async function handleBlockUser(req, res) {
+  try {
+    const {userId} = req.params;
+    const blockUserId = req.body;
+
+    const user = await User.findById(userId);
+    const userToblockData = await User.findById(blockUserId);
+
+    if (!userId && blockUserId._id) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ message: "please provide the proper userId && blockUserId" });
+    }
+    if (user.blockList.includes(blockUserId._id)) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ message: "User already blocked" });
+    }
+
+    if (userId.toString() === blockUserId._id.toString()) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ message: "cannot block yourself" });
+    }
+
+    user.blockList.push(blockUserId);
+    user.following=user.following.filter((id) => id.toString() !== blockUserId._id.toString());
+    user.followers=user.followers.filter((id) => id.toString() !== blockUserId._id.toString());
+    userToblockData.followers= userToblockData.followers.filter((id) => id.toString() !== userId.toString());
+    userToblockData.following= userToblockData.following.filter((id) => id.toString() !== userId.toString());
+    await user.save();
+    await userToblockData.save();
+    res.status(HTTP_OK).json({ message: "user blocked successfully" });
+  } catch (error) {
+    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      message: "Error occured in blocking the user",
+      details: error.message,
+    });
+  }
+}
 export {
   handleGetUser,
   handleUpdateUser,
   handleFollowUser,
   handleUnfollowUser,
+  handleBlockUser,
 };
