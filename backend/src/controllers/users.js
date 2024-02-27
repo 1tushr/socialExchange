@@ -116,4 +116,47 @@ async function handleFollowUser(req, res) {
   }
 }
 
-export { handleGetUser, handleUpdateUser, handleFollowUser };
+// function to unfollow user
+async function handleUnfollowUser(req, res) {
+  try {
+    const { userId } = req.params;
+    const userToUnfollowId = req.body;
+    if (!userId || !userToUnfollowId) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ message: "user Id is missing" });
+    }
+    if (userId.toString() === userToUnfollowId._id.toString()) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ message: "you cannot unfollow yourself" });
+    }
+    const user = await User.findById(userId);
+    const userToUnfollowData = await User.findById(userToUnfollowId);
+
+    user.following = user.following.filter(
+      (followedId) => followedId.toString() !== userToUnfollowId._id.toString()
+    );
+    // update the follower list of the unfollowed user also
+    userToUnfollowData.followers = userToUnfollowData.followers.filter(
+      (followerId) => followerId.toString() !== userId
+    );
+
+    await user.save();
+    await userToUnfollowData.save();
+
+    res.status(HTTP_OK).json({ message: "User unfollowed successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      message: "Error occurred during follow operation",
+      details: error.message,
+    });
+  }
+}
+export {
+  handleGetUser,
+  handleUpdateUser,
+  handleFollowUser,
+  handleUnfollowUser,
+};

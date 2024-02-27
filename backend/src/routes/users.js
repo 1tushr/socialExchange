@@ -3,6 +3,7 @@ import {
   handleGetUser,
   handleUpdateUser,
   handleFollowUser,
+  handleUnfollowUser,
 } from "../controllers/users.js";
 import isVerified from "../middlewares/isVerified.js";
 
@@ -18,7 +19,11 @@ userRouter.post("/updateuser/:userId", isVerified, handleUpdateUser);
 userRouter.post("/followuser/:userId", isVerified, handleFollowUser);
 
 //unfollow user
+userRouter.post("/unfollow/:userId", isVerified, handleUnfollowUser);
+
 //block user
+// userRouter.post("block/:userId", isVerified, handleBlockUser);
 //unblock user
+
 //delete user
 export default userRouter;
