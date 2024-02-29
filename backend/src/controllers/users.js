@@ -1,4 +1,7 @@
 import User from "../models/users.js";
+import Post from "../models/post.js";
+import Comment from "../models/comments.js";
+
 import * as HttpStatusCodes from "../constants/httpStatusCode.js";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
@@ -156,7 +159,6 @@ async function handleUnfollowUser(req, res) {
 }
 
 // function to block user
-
 async function handleBlockUser(req, res) {
   try {
     const { userId } = req.params;
@@ -263,6 +265,111 @@ async function handleUnblockUser(req, res) {
   }
 }
 
+//function to get blocked users
+async function handleGetblockedUsers(req, res) {
+  try {
+    const { userId } = req.params;
+    if (!userId) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ message: "please provide a valid userId" });
+    }
+    const user = await User.findById(userId).populate("blockList", [
+      "username",
+      "firstname",
+      "email",
+      "profilePhoto",
+    ]);
+
+    if (user) {
+      const { blockList, ...data } = user;
+      if (blockList.length > 0) {
+        res
+          .status(HTTP_OK)
+          .json({ message: "blocked users are ", details: blockList });
+      } else {
+        return res.status(HTTP_OK).json({ message: "zero blocked users" });
+      }
+    } else {
+      return res.status(HTTP_BAD_REQUEST).json({ message: "no user found " });
+    }
+  } catch (error) {
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      message: "cannot fetch the blocked user",
+      details: error.message,
+    });
+  }
+}
+
+//function to delete user
+async function handleDeleteUser(req, res) {
+  try {
+    // Extract userId from request parameters
+    const { userId } = req.params;
+
+    // Find the user to be deleted
+    const user = await User.findById(userId);
+
+    // Update followers of the user to be deleted
+    await User.updateMany(
+      { _id: { $in: user.following } },
+      { $pull: { followers: userId } }
+    );
+
+    // Delete posts created by the user
+    await Post.deleteMany({ user: userId });
+
+    // Delete comments created by the user
+    await Comment.deleteMany({ user: userId });
+
+    // Remove the user from comments in posts
+    await Post.updateMany(
+      { "comments.user": userId },
+      { $pull: { comments: { user: userId } } }
+    );
+
+    // Remove the user from replies to comments
+    await Comment.updateMany(
+      { "replies.user": userId },
+      { $pull: { replies: { user: userId } } }
+    );
+
+    // Remove likes from posts where the user liked
+    await Post.updateMany({ likes: userId }, { $pull: { likes: userId } });
+
+    // Remove likes from all posts
+    await Post.updateMany({}, { $pull: { likes: userId } });
+
+    // Remove likes from comments
+    await Comment.updateMany({}, { $pull: { likes: userId } });
+
+    // Remove likes from replies to comments
+    await Comment.updateMany(
+      { "replies.likes": userId },
+      { $pull: { "replies.likes": userId } }
+    );
+
+    // Remove the user from replies to comments
+    await Comment.updateMany(
+      { "replies.user": userId },
+      { $pull: { replies: { user: userId } } }
+    );
+
+    // Delete the user
+    await User.findByIdAndDelete(userId);
+
+    // Return success message
+    return res.status(HTTP_OK).json({ message: "User deleted successfully" });
+  } catch (error) {
+    // Handle errors and return an error response
+    console.error("Error deleting user:", error);
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      message: "Error deleting user",
+      details: error.message,
+    });
+  }
+}
+
 export {
   handleGetUser,
   handleUpdateUser,
@@ -270,4 +377,6 @@ export {
   handleUnfollowUser,
   handleBlockUser,
   handleUnblockUser,
+  handleGetblockedUsers,
+  handleDeleteUser,
 };

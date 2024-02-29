@@ -6,6 +6,8 @@ import {
   handleUnfollowUser,
   handleBlockUser,
   handleUnblockUser,
+  handleGetblockedUsers,
+  handleDeleteUser,
 } from "../controllers/users.js";
 import isVerified from "../middlewares/isVerified.js";
 
@@ -28,5 +30,10 @@ userRouter.post("/block/:userId", isVerified, handleBlockUser);
 
 //unblock user
 userRouter.post("/unblock/:userId", isVerified, handleUnblockUser);
+
+//get blocked users
+userRouter.post("/getblockedusers/:userId", isVerified, handleGetblockedUsers);
+
 //delete user
+userRouter.delete("/deleteUser/:userId", isVerified, handleDeleteUser);
 export default userRouter;
