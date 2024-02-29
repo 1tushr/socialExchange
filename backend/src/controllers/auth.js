@@ -117,6 +117,7 @@ async function handleLogout(req, res) {
       .clearCookie("token", { sameSite: "none", secure: true })
       .status(HTTP_OK)
       .json({ message: "user logged out success" });
+    res.redirect("/auth/login");
   } catch (error) {
     return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
       error: "An error occurred during user logout",

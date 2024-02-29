@@ -6,8 +6,13 @@ import * as HttpStatusCodes from "../constants/httpStatusCode.js";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 dotenv.config();
-const { HTTP_OK, HTTP_BAD_REQUEST, HTTP_INTERNAL_SERVER_ERROR, HTTP_CREATED } =
-  HttpStatusCodes;
+const {
+  HTTP_OK,
+  HTTP_BAD_REQUEST,
+  HTTP_INTERNAL_SERVER_ERROR,
+  HTTP_CREATED,
+  HTTP_NOT_FOUND,
+} = HttpStatusCodes;
 
 //function to get user
 async function handleGetUser(req, res) {
@@ -358,8 +363,8 @@ async function handleDeleteUser(req, res) {
     // Delete the user
     await User.findByIdAndDelete(userId);
 
-    // Return success message
-    return res.status(HTTP_OK).json({ message: "User deleted successfully" });
+    res.status(HTTP_OK).json({ message: "User deleted successfully" });
+    res.redirect("/auth/login");
   } catch (error) {
     // Handle errors and return an error response
     console.error("Error deleting user:", error);
@@ -367,6 +372,35 @@ async function handleDeleteUser(req, res) {
       message: "Error deleting user",
       details: error.message,
     });
+  }
+}
+
+//function to search user
+async function handleSearchUser(req, res) {
+  try {
+    const { query } = req.params;
+    if (!query || query.trim() === "") {
+      return res.status(HTTP_BAD_REQUEST).json({
+        message: "please provide either proper username or firstname",
+      });
+    }
+    const user = await User.findOne({
+      $or: [
+        { username: { $regex: new RegExp(query, "i") } },
+        { firstname: { $regex: new RegExp(query, "i") } },
+      ],
+    });
+
+    if (!user) {
+      return res.status(HTTP_NOT_FOUND).json({ message: "no user found." });
+    } else {
+      res.status(HTTP_OK).json({ message: "user found", user });
+    }
+  } catch (error) {
+    console.error("Error while finding user:", error);
+    res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ message: "Error while finding user", details: error.message });
   }
 }
 
@@ -379,4 +413,5 @@ export {
   handleUnblockUser,
   handleGetblockedUsers,
   handleDeleteUser,
+  handleSearchUser,
 };
