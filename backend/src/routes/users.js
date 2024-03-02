@@ -9,8 +9,11 @@ import {
   handleGetblockedUsers,
   handleDeleteUser,
   handleSearchUser,
+  handleUpdateProfile,
+  handleUpdateCover,
 } from "../controllers/users.js";
 import isVerified from "../middlewares/isVerified.js";
+import upload from "../middlewares/upload.js";
 
 const userRouter = express.Router();
 
@@ -40,4 +43,10 @@ userRouter.delete("/deleteUser/:userId", isVerified, handleDeleteUser);
 
 //search user
 userRouter.get("/serachuser/:query", handleSearchUser);
+
+//upload profile
+userRouter.put("/updateprofile/:userId",upload.single("profilepicture"),handleUpdateProfile)
+
+//upload cover photo
+userRouter.put("/updatecoverphoto/:userId",upload.single("coverphoto"), handleUpdateCover)
 export default userRouter;

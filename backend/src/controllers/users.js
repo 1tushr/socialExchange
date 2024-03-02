@@ -1,7 +1,6 @@
 import User from "../models/users.js";
 import Post from "../models/post.js";
 import Comment from "../models/comments.js";
-
 import * as HttpStatusCodes from "../constants/httpStatusCode.js";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
@@ -404,6 +403,71 @@ async function handleSearchUser(req, res) {
   }
 }
 
+const generateFileUrl = (filename) => {
+  return process.env.URL + `/uploads/${filename}`;
+};
+// function to update profile picture
+async function handleUpdateProfile(req, res) {
+  try {
+    const { userId } = req.params;
+    const { filename } = req.file;
+
+    // Check if userId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(HTTP_BAD_REQUEST).json({ message: "Invalid user ID" });
+    }
+
+    // Use findByIdAndUpdate to simplify finding the user by its ID
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { profilePhoto: generateFileUrl(filename) },
+      { new: true }
+    );
+
+    if (!user) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ message: "Profile update failed - User not found" });
+    }
+
+    res.status(HTTP_OK).json({ message: "Profile update successful", user });
+  } catch (error) {
+    console.error("Error in handleUpdateProfile:", error);
+
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ message: "Server error", details: error.message });
+  }
+}
+
+//function to update the cover photo
+async function handleUpdateCover(req, res) {
+  try {
+    const { userId } = req.params;
+    const { filename } = req.file;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ message: "Please provide the proper userId" });
+    }
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { coverPhoto: generateFileUrl(filename) },
+      { new: true }
+    );
+    if (!user) {
+      return res.status(HTTP_BAD_REQUEST).json({ message: "user not found" });
+    }
+    res.status(HTTP_OK).json({ message: "cover photo updated" });
+  } catch (error) {
+    console.error("Error in update cover photo:", error);
+
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ message: "Server error", details: error.message });
+  }
+}
+
 export {
   handleGetUser,
   handleUpdateUser,
@@ -414,4 +478,6 @@ export {
   handleGetblockedUsers,
   handleDeleteUser,
   handleSearchUser,
+  handleUpdateProfile,
+  handleUpdateCover
 };
