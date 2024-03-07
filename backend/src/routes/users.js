@@ -45,8 +45,16 @@ userRouter.delete("/deleteUser/:userId", isVerified, handleDeleteUser);
 userRouter.get("/serachuser/:query", handleSearchUser);
 
 //upload profile
-userRouter.put("/updateprofile/:userId",upload.single("profilepicture"),handleUpdateProfile)
+userRouter.put(
+  "/updateprofile/:userId",
+  upload.single("profilepicture"),
+  handleUpdateProfile
+);
 
 //upload cover photo
-userRouter.put("/updatecoverphoto/:userId",upload.single("coverphoto"), handleUpdateCover)
+userRouter.put(
+  "/updatecoverphoto/:userId",
+  upload.single("coverphoto"),
+  handleUpdateCover
+);
 export default userRouter;

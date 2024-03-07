@@ -1,0 +1,55 @@
+import Post from "../models/post.js";
+import User from "../models/users.js";
+import { HTTP_BAD_REQUEST, HTTP_CREATED } from "../constants/httpStatusCode.js";
+import mongoose from "mongoose";
+
+async function createNewpost(req, res) {
+  try {
+    // Extract user ID from request parameters and caption from request body
+    const { userid } = req.params;
+    const { caption } = req.body;
+
+    // Validate that userid is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(userid)) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ message: "Invalid user ID format" });
+    }
+
+    // Find user by ID
+    const user = await User.findById(userid);
+
+    // Check if user exists
+    if (!user) {
+      // If user not found, respond with a bad request status and a message
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ message: "No user found with the given ID" });
+    }
+
+    // Check if caption is provided
+    if (!caption || caption.trim() === "") {
+      // If caption is missing or empty, respond with a bad request status and a message
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ message: "Caption is required" });
+    }
+
+    // If all conditions are met, create a new post with user and caption
+    const newPost = await Post.create({
+      user,
+      caption,
+    });
+
+    // Save the new post to the database
+    await newPost.save();
+
+    // Respond with a success status and a message
+    res.status(HTTP_CREATED).json({ message: "New post created successfully" });
+  } catch (error) {
+    // If an error occurs during the process, handle it and respond with an error status
+    console.error("Error creating post:", error);
+    res.status(HTTP_BAD_REQUEST).json({ message: "Error creating post" });
+  }
+}
+export default createNewpost;
