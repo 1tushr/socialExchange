@@ -115,7 +115,7 @@ async function getAllPosts(req, res) {
       user: {
         $nin: blockedUserIds,
       },
-    }).populate("user", "username");
+    }).populate("user", "username profilePhoto ");
 
     console.log("posts", posts);
     res.json({ posts });

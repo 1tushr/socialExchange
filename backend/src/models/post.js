@@ -30,7 +30,7 @@ const postSchema = new Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true, strictPopulate: false }
 );
 
 const Post = model("Post", postSchema);
