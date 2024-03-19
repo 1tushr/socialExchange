@@ -3,6 +3,8 @@ import Post from "../models/post.js";
 import {
   HTTP_BAD_REQUEST,
   HTTP_CREATED,
+  HTTP_INTERNAL_SERVER_ERROR,
+  HTTP_NOT_FOUND,
   HTTP_OK,
 } from "../constants/httpStatusCode.js";
 import mongoose from "mongoose";
@@ -98,4 +100,30 @@ async function updatePost(req, res) {
   }
 }
 
-export { createNewpost, updatePost };
+async function getAllPosts(req, res) {
+  try {
+    const { userid } = req.params;
+    const user = await User.findById(userid);
+
+    if (!user) {
+      return res.status(HTTP_NOT_FOUND).json({ message: "User not found" });
+    }
+
+    const blockedUserIds = user.blockList.map((id) => id.toString());
+
+    const posts = await Post.find({
+      user: {
+        $nin: blockedUserIds,
+      },
+    }).populate("user", "username");
+
+    console.log("posts", posts);
+    res.json({ posts });
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ error: "Internal Server Error" });
+  }
+}
+export { createNewpost, updatePost, getAllPosts };
