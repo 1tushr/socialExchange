@@ -51,7 +51,8 @@ async function createNewpost(req, res) {
 
     // Save the new post to the database
     await newPost.save();
-
+    user.posts.push(newPost._id);
+    await user.save();
     // Respond with a success status and a message
     res
       .status(HTTP_CREATED)
@@ -62,7 +63,6 @@ async function createNewpost(req, res) {
     res.status(HTTP_BAD_REQUEST).json({ message: "Error creating post" });
   }
 }
-
 async function updatePost(req, res) {
   try {
     const { postid } = req.params;
@@ -99,7 +99,6 @@ async function updatePost(req, res) {
     res.status(HTTP_BAD_REQUEST).json({ message: "Error in updating post" });
   }
 }
-
 async function getAllPosts(req, res) {
   try {
     const { userid } = req.params;
@@ -135,6 +134,14 @@ async function deletePost(req, res) {
         .status(HTTP_NOT_FOUND)
         .json({ message: "no post found for this id to delete" });
     }
+    const user = await User.findById(postToDelete.user);
+    if (!user) {
+      return res.status(HTTP_NOT_FOUND).json({ message: "no user found" });
+    }
+    user.posts = user.posts.filter(
+      (postid) => postid.toString() !== postToDelete._id.toString()
+    );
+    await user.save();
     await postToDelete.deleteOne();
     res.status(HTTP_OK).json({ message: "post deleted successfully" });
   } catch (error) {
