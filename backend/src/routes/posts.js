@@ -2,6 +2,7 @@ import isVerified from "../middlewares/isVerified.js";
 import express from "express";
 import {
   createNewpost,
+  deletePost,
   getAllPosts,
   updatePost,
 } from "../controllers/posts.js";
@@ -15,7 +16,7 @@ postRouter.put("/updatepost/:postid", updatePost);
 //get all post
 postRouter.get("/getallposts/:userid", getAllPosts);
 //delete post
-
+postRouter.delete("/deletepost/:postid", deletePost);
 //like post
 
 //dislike post

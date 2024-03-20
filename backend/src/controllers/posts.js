@@ -126,4 +126,22 @@ async function getAllPosts(req, res) {
       .json({ error: "Internal Server Error" });
   }
 }
-export { createNewpost, updatePost, getAllPosts };
+async function deletePost(req, res) {
+  try {
+    const { postid } = req.params;
+    const postToDelete = await Post.findById(postid);
+    if (!postToDelete) {
+      return res
+        .status(HTTP_NOT_FOUND)
+        .json({ message: "no post found for this id to delete" });
+    }
+    await postToDelete.deleteOne();
+    res.status(HTTP_OK).json({ message: "post deleted successfully" });
+  } catch (error) {
+    console.error("Error in deleting the post:", error);
+    res
+      .status(HTTP_BAD_REQUEST)
+      .json({ message: "Error in deleting the post" });
+  }
+}
+export { createNewpost, updatePost, getAllPosts, deletePost };
