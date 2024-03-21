@@ -111,9 +111,11 @@ async function handleLogin(req, res) {
 async function handleLogout(req, res) {
   try {
     if (!req.cookies.token) {
-      res.status(HTTP_BAD_REQUEST).json({ message: "no token to clear" });
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ message: "no token to clear" });
     }
-    res
+    return res
       .clearCookie("token", { sameSite: "none", secure: true })
       .status(HTTP_OK)
       .json({ message: "user logged out success" });

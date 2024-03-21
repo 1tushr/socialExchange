@@ -151,4 +151,66 @@ async function deletePost(req, res) {
       .json({ message: "Error in deleting the post" });
   }
 }
-export { createNewpost, updatePost, getAllPosts, deletePost };
+async function likepost(req, res) {
+  try {
+    const { postid } = req.params;
+    console.log("postid", postid);
+    const postToLike = await Post.findById(postid);
+    if (!postToLike) {
+      return res
+        .status(HTTP_NOT_FOUND)
+        .json({ message: "no post found to like" });
+    }
+
+    const userid = req.locals._id;
+
+    if (!userid) {
+      return res
+        .status(HTTP_NOT_FOUND)
+        .json({ message: "you are not logged in" });
+    }
+    if (
+      postToLike.likes.map((id) => id.toString()).includes(userid.toString())
+    ) {
+      return res
+        .status(HTTP_INTERNAL_SERVER_ERROR)
+        .json({ message: "post is already liked" });
+    }
+    postToLike.likes.push(userid);
+    return res.status(HTTP_OK).json({ message: "post liking success" });
+  } catch (error) {
+    console.error("Error in liking the post:", error);
+    res.status(HTTP_BAD_REQUEST).json({ message: "Error in liking the post" });
+  }
+}
+async function dislikepost(req, res) {
+  try {
+    const { postid } = req.params;
+    const postToDislike = await Post.findById(postid);
+    if (!postToDislike) {
+      return res
+        .status(HTTP_NOT_FOUND)
+        .json({ message: "no post found to dislike" });
+    }
+    const userid = req.locals._id;
+    postToDislike.likes = postToDislike.likes.filter(
+      (id) => id.toString() != userid.toString()
+    );
+    await postToDislike.save();
+    return res.status(HTTP_OK).json({ message: "photo disliking success" });
+  } catch (error) {
+    console.error("Error in disliking the post:", error);
+    res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ message: "Error in disliking the post" });
+  }
+}
+
+export {
+  createNewpost,
+  updatePost,
+  getAllPosts,
+  deletePost,
+  likepost,
+  dislikepost,
+};
