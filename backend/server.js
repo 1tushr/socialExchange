@@ -5,6 +5,7 @@ import connectDb from "../backend/src/config/database.js";
 import authRouter from "./src/routes/auth.js";
 import userRouter from "./src/routes/users.js";
 import postRouter from "./src/routes/posts.js";
+import commentsRouter from "./src/routes/comments.js";
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -24,6 +25,8 @@ const startServer = async () => {
 
 startServer();
 
-app.use("/auth", authRouter);
-app.use("/user", userRouter);
-app.use("/post", postRouter);
+app
+  .use("/auth", authRouter)
+  .use("/user", userRouter)
+  .use("/post", postRouter)
+  .use("/comments", commentsRouter);
