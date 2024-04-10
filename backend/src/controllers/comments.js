@@ -81,5 +81,26 @@ async function updateComment(req, res) {
       .json({ message: "Error in updating comment" });
   }
 }
+//Controller function to handle get comments
+async function getComments(req, res) {
+  try {
+    const { commentid } = req.params;
+    const getComments = await Comment.findById(commentid);
+
+    if (!getComments) {
+      return res
+        .status(HTTP_NOT_FOUND)
+        .json({ message: "no comment found with this id " });
+    } else {
+      const { text } = getComments;
+      res.status(HTTP_OK).json({ message: "comment fetched success", text });
+    }
+  } catch (error) {
+    console.error("Error in getting comment:", error);
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ message: "Error in getting comment" });
+  }
+}
 // Export the controller function
-export { postComment, updateComment };
+export { postComment, updateComment, getComments };
