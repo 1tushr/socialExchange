@@ -3,6 +3,7 @@ import {
   HTTP_CREATED,
   HTTP_NOT_FOUND,
   HTTP_BAD_REQUEST,
+  HTTP_OK,
 } from "../constants/httpStatusCode.js";
 import Comment from "../models/comments.js";
 import Post from "../models/post.js";
@@ -55,6 +56,30 @@ async function postComment(req, res) {
       .json({ message: "Error creating comment" });
   }
 }
-
+//Controller function to handle update comments
+async function updateComment(req, res) {
+  try {
+    const { commentid } = req.params;
+    const { text } = req.body;
+    if (!commentid) {
+      return res
+        .status(HTTP_NOT_FOUND)
+        .json({ message: "no comment found to update" });
+    }
+    const updatedComment = await Comment.findByIdAndUpdate(
+      { _id: commentid },
+      { text: text },
+      { new: true }
+    );
+    res
+      .status(HTTP_OK)
+      .json({ message: "updated comment success", updatedComment });
+  } catch (error) {
+    console.error("Error in updating comment:", error);
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ message: "Error in updating comment" });
+  }
+}
 // Export the controller function
-export default postComment;
+export { postComment, updateComment };
