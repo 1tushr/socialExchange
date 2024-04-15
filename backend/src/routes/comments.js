@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  deleteComment,
   getComments,
   postComment,
   updateComment,
@@ -11,7 +12,7 @@ commentsRouter.post("/postcomment/:postid", postComment);
 //update comment
 commentsRouter.put("/updatecomment/:commentid", updateComment);
 //delete comment
-// commentsRouter.delete("/deletecomment/:commentid", deleteComment);
+commentsRouter.delete("/deletecomment/:commentid", deleteComment);
 //get comment
 commentsRouter.get("/getcomments/:commentid", getComments);
 export default commentsRouter;

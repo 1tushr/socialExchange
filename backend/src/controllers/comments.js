@@ -102,5 +102,25 @@ async function getComments(req, res) {
       .json({ message: "Error in getting comment" });
   }
 }
+
+async function deleteComment(req, res) {
+  try {
+    const { commentid } = req.params;
+    const commentToDelete = await Comment.findById(commentid);
+
+    if (!commentToDelete) {
+      return res
+        .status(HTTP_NOT_FOUND)
+        .json({ message: "Not comment found for deletion" });
+    }
+    await commentToDelete.deleteOne();
+    res.status(HTTP_OK).json({ message: "comment deleted success" });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ message: "Internal server error" });
+  }
+}
 // Export the controller function
-export { postComment, updateComment, getComments };
+export { postComment, updateComment, getComments, deleteComment };
